@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import TreeInfoPopup from "../../components/TreeInfoPopup";
 
 interface Tree {
   id: number;
@@ -18,13 +19,35 @@ export default function Marketplace() {
   const [sortBy, setSortBy] = useState("recommended");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [addedId, setAddedId] = useState<number | null>(null);
+  const [selectedTree, setSelectedTree] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchTrees() {
       try {
         const res = await fetch("/api/trees");
         const data = await res.json();
-        setTrees(data);
+        
+        const enhancedData = await Promise.all(data.map(async (t: Tree) => {
+          try {
+            let q = t.name.trim();
+            let wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+            if (!wikiRes.ok) {
+              q = t.name.replace(/Tree/ig, "").trim();
+              wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+            }
+            if (wikiRes.ok) {
+              const wikiData = await wikiRes.json();
+              if (wikiData.thumbnail?.source) {
+                return { ...t, img: wikiData.thumbnail.source };
+              }
+            }
+            return t;
+          } catch(e) {
+            return t;
+          }
+        }));
+
+        setTrees(enhancedData);
       } catch (error) {
         console.error("Failed to load trees", error);
       } finally {
@@ -221,16 +244,24 @@ export default function Marketplace() {
                       </span>
                     </div>
 
-                    <button
-                      onClick={() => handleAdd(tree.id)}
-                      className={`mt-auto w-full font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                        addedId === tree.id
-                          ? "bg-primary text-white"
-                          : "bg-forest text-white hover:bg-gradient-to-r hover:from-accent-dark hover:via-accent hover:to-accent-light"
-                      }`}
-                    >
-                      {addedId === tree.id ? "✓ Added to Cart" : "🌿 Sponsor This Tree"}
-                    </button>
+                    <div className="mt-auto flex flex-col gap-2">
+                      <button
+                        onClick={() => handleAdd(tree.id)}
+                        className={`w-full font-bold py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
+                          addedId === tree.id
+                            ? "bg-primary text-white"
+                            : "bg-forest text-white hover:bg-gradient-to-r hover:from-accent-dark hover:via-accent hover:to-accent-light shadow-md"
+                        }`}
+                      >
+                        {addedId === tree.id ? "✓ Added to Cart" : "🌿 Sponsor This Tree"}
+                      </button>
+                      <button
+                        onClick={() => setSelectedTree(tree.name)}
+                        className="w-full font-bold py-2.5 rounded-xl bg-surface border border-sand text-forest hover:bg-cream transition-colors shadow-sm flex items-center justify-center gap-2"
+                      >
+                        ℹ️ More Info
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -238,6 +269,12 @@ export default function Marketplace() {
           )}
         </section>
       </div>
+
+      <TreeInfoPopup 
+        isOpen={!!selectedTree} 
+        treeName={selectedTree} 
+        onClose={() => setSelectedTree(null)} 
+      />
     </div>
   );
 }

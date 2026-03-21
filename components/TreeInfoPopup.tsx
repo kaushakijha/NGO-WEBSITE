@@ -24,10 +24,16 @@ export default function TreeInfoPopup({ treeName, isOpen, onClose }: TreeInfoPop
 
     const fetchTreeInfo = async () => {
       try {
-        const queryName = treeName.trim();
-        const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(queryName)}`);
+        let queryName = treeName.trim();
+        console.log(queryName);
+        let res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(queryName)}`);
         
-        if (!res.ok) throw new Error("Not found");
+        if (!res.ok) {
+          queryName = treeName.replace(/Tree/ig, "").trim();
+          console.log("Retrying with:", queryName);
+          res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(queryName)}`);
+          if (!res.ok) throw new Error("Not found");
+        }
         
         const data = await res.json();
         
