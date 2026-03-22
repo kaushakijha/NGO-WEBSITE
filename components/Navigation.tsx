@@ -3,10 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, User, Leaf, Menu, X } from "lucide-react";
-import { useCart } from "./CartProvider";
-import { useAuth } from "./AuthProvider";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -16,13 +12,33 @@ const navLinks = [
   { href: "/mission", label: "About Us" },
 ];
 
+// Inline SVG leaf icon for branding
+const LeafLogo = () => (
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16 2C16 2 6 8 6 18C6 23.5228 10.4772 28 16 28C21.5228 28 26 23.5228 26 18C26 8 16 2 16 2Z" fill="#047857" opacity="0.9"/>
+    <path d="M16 8C16 8 11 13 11 19C11 21.7614 13.2386 24 16 24C18.7614 24 21 21.7614 21 19C21 13 16 8 16 8Z" fill="#34d399" opacity="0.6"/>
+    <path d="M16 28V12" stroke="#faf8f3" strokeWidth="1.5" strokeLinecap="round" opacity="0.7"/>
+    <path d="M16 18L12 14" stroke="#faf8f3" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+    <path d="M16 15L19 12" stroke="#faf8f3" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+  </svg>
+);
+
+import { useCart } from "./CartProvider";
+
 export default function Navigation() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cartItems, setIsCartOpen } = useCart();
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const [scrolled, setScrolled] = useState(false);
-  const { user } = useAuth();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/user/me").then(r => r.json()).then(d => {
+      if (d.user) setUser(d.user);
+      else setUser(null);
+    }).catch(() => setUser(null));
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -35,31 +51,21 @@ export default function Navigation() {
   }, [pathname]);
 
   return (
-    <motion.header
+    <header
       className={`sticky top-0 z-50 w-full transition-all duration-500 ${
         scrolled
-          ? "glass shadow-lg shadow-forest/8 border-b border-forest/10"
-          : "bg-cream border-b border-sand/60"
+          ? "glass shadow-lg shadow-forest/5 border-b border-primary/10"
+          : "bg-cream/80 backdrop-blur-sm border-b border-sand"
       }`}
-      initial={{ y: -80 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
     >
-      <div className={`mx-auto flex items-center justify-between px-5 sm:px-6 lg:px-8 max-w-7xl transition-all duration-500 ${
-        scrolled ? "h-[60px]" : "h-[72px]"
-      }`}>
+      <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 8 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-emerald to-primary-light flex items-center justify-center shadow-md shadow-emerald/20">
-              <Leaf className="w-5 h-5 text-white" strokeWidth={2.5} />
-            </div>
-          </motion.div>
+          <div className="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+            <LeafLogo />
+          </div>
           <div className="flex flex-col">
-            <h1 className="text-[17px] font-heading font-bold text-forest tracking-tight leading-tight">Renukiran</h1>
+            <h1 className="text-[17px] font-heading font-bold text-forest tracking-tight">Renukiran</h1>
             <span className="text-[9px] text-earth font-semibold tracking-[0.2em] uppercase">Foundation</span>
           </div>
         </Link>
@@ -72,25 +78,15 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative text-[13px] font-semibold px-4 py-2 rounded-full transition-colors duration-300"
+                className={`relative text-[13px] font-semibold px-4 py-2 rounded-full transition-all duration-300 ${
+                  isActive
+                    ? "text-primary bg-primary/8"
+                    : "text-bark/70 hover:text-primary hover:bg-primary/5"
+                }`}
               >
+                {link.label}
                 {isActive && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    className="absolute inset-0 bg-emerald/10 rounded-full"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className={`relative z-10 ${
-                  isActive ? "text-emerald" : "text-dark/60 hover:text-emerald"
-                }`}>
-                  {link.label}
-                </span>
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-dot"
-                    className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-emerald rounded-full"
-                  />
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                 )}
               </Link>
             );
@@ -98,156 +94,116 @@ export default function Navigation() {
         </nav>
 
         {/* Right Side */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Cart */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <button 
             onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center justify-center size-10 rounded-full bg-sand/60 text-forest hover:bg-sand transition-colors"
+            className="relative flex items-center justify-center size-10 rounded-full bg-sand text-forest hover:bg-[#eae5d8] transition-colors"
           >
-            <ShoppingCart className="w-[18px] h-[18px]" />
-            <AnimatePresence>
-              {totalItems > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-white shadow-sm"
-                >
-                  {totalItems}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.button>
-
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-white">
+                {totalItems}
+              </span>
+            )}
+          </button>
+          
           {/* Auth Button */}
           {user ? (
-            <Link
+            <Link 
               href={user.role === "admin" ? "/admin" : "/dashboard"}
-              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full bg-emerald/8 border border-emerald/15 text-forest text-[13px] font-bold hover:bg-emerald/15 transition-colors"
+              className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-forest text-sm font-bold hover:bg-primary/20 transition-colors shadow-sm"
             >
-              <User className="w-4 h-4 text-emerald" />
-              {user.role === "admin" ? "Admin" : "Dashboard"}
+              <span className="text-primary text-lg">👤</span> {user.role === "admin" ? "Admin Panel" : "My Dashboard"}
             </Link>
           ) : (
-            <Link
+            <Link 
               href="/login"
-              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-sand text-forest text-[13px] font-semibold hover:bg-cream transition-colors shadow-sm"
+              className="hidden lg:flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-sand text-forest text-sm font-bold hover:bg-cream transition-colors shadow-sm"
             >
               Sign In
             </Link>
           )}
 
-          {/* Donate CTA */}
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Link
-              href="/marketplace"
-              className="hidden lg:flex h-10 items-center gap-2 rounded-full bg-gradient-gold px-6 text-[13px] font-bold text-white shadow-md shadow-accent/20 hover:shadow-lg hover:shadow-accent/30 transition-shadow"
-            >
-              <Leaf className="w-4 h-4" />
-              Plant a Tree
-            </Link>
-          </motion.div>
+          {/* Gold accent donate button */}
+          <Link
+            href="/marketplace"
+            className="hidden lg:flex h-10 items-center gap-2 rounded-full bg-gradient-to-r from-accent-dark via-accent to-accent-light px-6 text-[13px] font-bold text-white shadow-md shadow-accent/25 hover:shadow-lg hover:shadow-accent/35 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 1C8 1 3 4 3 9C3 11.7614 5.23858 14 8 14C10.7614 14 13 11.7614 13 9C13 4 8 1 8 1Z" fill="white" opacity="0.9"/>
+            </svg>
+            Plant a Tree
+          </Link>
 
           {/* Mobile toggle */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className="lg:hidden p-2 text-dark hover:text-emerald rounded-xl hover:bg-emerald/5 transition-all"
+          <button
+            className="lg:hidden p-2 text-bark hover:text-primary rounded-xl hover:bg-primary/5 transition-all"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            <AnimatePresence mode="wait">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               {mobileMenuOpen ? (
-                <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                  <X className="w-6 h-6" />
-                </motion.div>
+                <>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </>
               ) : (
-                <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                  <Menu className="w-6 h-6" />
-                </motion.div>
+                <>
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <line x1="4" y1="12" x2="16" y2="12" />
+                  <line x1="4" y1="17" x2="12" y2="17" />
+                </>
               )}
-            </AnimatePresence>
-          </motion.button>
+            </svg>
+          </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.nav
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="lg:hidden overflow-hidden bg-cream/95 backdrop-blur-xl border-t border-sand/50"
+      <div
+        className={`lg:hidden overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          mobileMenuOpen ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <nav className="flex flex-col gap-1 px-5 pb-5 pt-2 bg-cream border-t border-sand">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-[14px] font-semibold px-4 py-3.5 rounded-xl transition-all ${
+                  isActive
+                    ? "text-primary bg-primary/8 font-bold"
+                    : "text-bark/70 hover:text-primary hover:bg-primary/5"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="mt-2 text-[14px] font-semibold px-4 py-3.5 rounded-xl transition-all text-left text-bark/70 hover:text-primary hover:bg-primary/5 flex items-center gap-2"
           >
-            <div className="flex flex-col gap-1 px-5 pb-5 pt-3">
-              {navLinks.map((link, i) => {
-                const isActive = pathname === link.href;
-                return (
-                  <motion.div
-                    key={link.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <Link
-                      href={link.href}
-                      className={`text-[14px] font-semibold px-4 py-3.5 rounded-xl transition-all block ${
-                        isActive
-                          ? "text-emerald bg-emerald/8 font-bold"
-                          : "text-dark/60 hover:text-emerald hover:bg-emerald/5"
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                );
-              })}
-
-              <motion.button
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: navLinks.length * 0.05 }}
-                onClick={() => setIsCartOpen(true)}
-                className="mt-2 text-[14px] font-semibold px-4 py-3.5 rounded-xl text-left text-dark/60 hover:text-emerald hover:bg-emerald/5 flex items-center gap-2"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                View Cart {totalItems > 0 ? `(${totalItems})` : ""}
-              </motion.button>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: (navLinks.length + 1) * 0.05 }}
-              >
-                <Link
-                  href={user ? (user.role === "admin" ? "/admin" : "/dashboard") : "/login"}
-                  className="text-[14px] font-semibold px-4 py-3.5 rounded-xl text-left text-dark/60 hover:text-emerald hover:bg-emerald/5 flex items-center gap-2 w-full"
-                >
-                  <User className="w-4 h-4" />
-                  {user ? "Dashboard" : "Sign In"}
-                </Link>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: (navLinks.length + 2) * 0.05 }}
-              >
-                <Link
-                  href="/marketplace"
-                  className="mt-3 h-12 flex items-center justify-center rounded-full bg-gradient-gold text-[14px] font-bold text-white shadow-md gap-2"
-                >
-                  <Leaf className="w-4 h-4" />
-                  Plant a Tree — ₹299
-                </Link>
-              </motion.div>
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
-    </motion.header>
+            🛒 View Cart {totalItems > 0 ? `(${totalItems} items)` : ""}
+          </button>
+          
+          <Link
+            href={user ? (user.role === "admin" ? "/admin" : "/dashboard") : "/login"}
+            className="text-[14px] font-semibold px-4 py-3.5 rounded-xl transition-all text-left text-bark/70 hover:text-primary hover:bg-primary/5 flex items-center gap-2"
+          >
+            👤 {user ? "My Dashboard" : "Sign In"}
+          </Link>
+          
+          <Link
+            href="/marketplace"
+            className="mt-3 h-12 flex items-center justify-center rounded-full bg-gradient-to-r from-accent-dark via-accent to-accent-light text-[14px] font-bold text-white shadow-md"
+          >
+            🌿 Plant a Tree — ₹299
+          </Link>
+        </nav>
+      </div>
+    </header>
   );
 }
