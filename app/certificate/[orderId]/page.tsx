@@ -187,13 +187,21 @@ export default function CertificatePage() {
         </button>
       </div>
 
-      <div id="certificate-container" className="min-h-screen flex items-center justify-center bg-[#fdfaf5] py-16 px-4">
-        {/* Certificate Card */}
-        <div 
-          id="certificate-card" 
-          className="relative w-full max-w-[950px] aspect-[1.414/1] bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(12,46,26,0.1)] overflow-hidden border border-sand/50"
-          style={{ backgroundColor: '#ffffff' }}
-        >
+      <div id="certificate-container" className="min-h-screen flex flex-col items-center justify-center bg-[#fdfaf5] py-24 px-4 sm:px-8">
+        {/* Mobile instruction */}
+        <p className="md:hidden text-forest/70 text-sm mb-4 animate-pulse flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2h-10a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+          Scroll horizontally to view
+        </p>
+        
+        {/* Scrollable Wrapper for Mobile */}
+        <div className="w-full max-w-[950px] overflow-x-auto pb-6 flex justify-start md:justify-center">
+          {/* Certificate Card */}
+          <div 
+            id="certificate-card" 
+            className="relative w-[950px] min-w-[950px] aspect-[1.414/1] bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(12,46,26,0.1)] overflow-hidden border border-sand/50 shrink-0"
+            style={{ backgroundColor: '#ffffff' }}
+          >
 
           {/* Background Patterns & Watermark */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none dot-pattern"></div>
@@ -229,11 +237,11 @@ export default function CertificatePage() {
           </svg>
 
           {/* Content */}
-          <div className="relative z-10 h-full flex flex-col p-12 md:p-14 lg:p-16 pb-20 md:pb-24">
+          <div className="relative z-10 h-full flex flex-col p-16 pb-24">
 
             {/* Header Section */}
             <div className="flex-1 max-w-[55%] flex flex-col">
-              <div className="flex items-center gap-3 mb-8 md:mb-10">
+              <div className="flex items-center gap-3 mb-10">
                 <LeafLogo />
                 <div>
                   <p className="font-bold text-[#0c2e1a] text-lg tracking-wide heading-serif">Renukiran</p>
@@ -241,25 +249,25 @@ export default function CertificatePage() {
                 </div>
               </div>
 
-              <h1 className="heading-serif text-4xl md:text-5xl font-black text-[#059669] leading-tight mb-2 whitespace-nowrap">
+              <h1 className="heading-serif text-5xl font-black text-[#059669] leading-tight mb-2 whitespace-nowrap">
                 Proof of Completion
               </h1>
-              <div className="w-20 h-1.5 bg-[#d4a843] rounded-full mb-6 md:mb-8"></div>
+              <div className="w-20 h-1.5 bg-[#d4a843] rounded-full mb-8"></div>
 
-              <div className="mb-6 md:mb-8">
-                <p className="text-[#6b6b5e] text-[10px] font-bold uppercase tracking-[0.2em] mb-2 md:mb-3">
+              <div className="mb-8">
+                <p className="text-[#6b6b5e] text-[10px] font-bold uppercase tracking-[0.2em] mb-3">
                   This is to officially recognize
                 </p>
-                <p className="text-[#047857] text-3xl md:text-4xl font-black heading-serif truncate">
+                <p className="text-[#047857] text-4xl font-black heading-serif truncate">
                   {data.userName}
                 </p>
               </div>
 
-              <div className="mb-8 md:mb-10">
-                <p className="text-[#6b6b5e] text-[10px] font-bold uppercase tracking-[0.2em] mb-2 md:mb-3">
+              <div className="mb-10">
+                <p className="text-[#6b6b5e] text-[10px] font-bold uppercase tracking-[0.2em] mb-3">
                   For the environmental stewardship of
                 </p>
-                <h2 className="text-[#0c2e1a] text-lg md:text-xl font-bold leading-relaxed line-clamp-2">
+                <h2 className="text-[#0c2e1a] text-xl font-bold leading-relaxed line-clamp-2">
                   {treeSummary}
                 </h2>
               </div>
@@ -267,11 +275,11 @@ export default function CertificatePage() {
               <div className="flex items-center gap-8 border-t border-[#e8dcc8] pt-8 mt-auto">
                 <div>
                   <p className="text-[#6b6b5e] text-[9px] uppercase tracking-[0.15em] mb-1 opacity-70">Date of Issue</p>
-                  <p className="text-[#0c2e1a] font-black text-sm font-mono">{date}</p>
+                  <p className="text-[#0c2e1a] font-black text-sm font-mono whitespace-nowrap">{date}</p>
                 </div>
                 <div>
                   <p className="text-[#6b6b5e] text-[9px] font-bold uppercase tracking-[0.15em] mb-1 opacity-70 whitespace-nowrap">Certificate Number</p>
-                  <p className="text-[#0c2e1a] font-black text-sm font-mono truncate">{data.certificateId}</p>
+                  <p className="text-[#0c2e1a] font-black text-sm font-mono whitespace-nowrap">{data.certificateId}</p>
                 </div>
               </div>
             </div>
@@ -287,12 +295,12 @@ export default function CertificatePage() {
           {/* Branding elements on the green background */}
           <div className="absolute bottom-12 right-12 z-20 flex flex-col items-end text-right">
              {/* Dynamic Total Contribution */}
-             <div 
-                className="border rounded-3xl p-6 md:p-8 mb-6 shadow-2xl min-w-[180px]"
+              <div 
+                className="border rounded-3xl p-8 mb-6 shadow-2xl min-w-[200px]"
                 style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(16px)' }}
               >
                 <p className="text-white/60 text-[9px] font-bold uppercase tracking-[0.15em] mb-2">Total Contribution</p>
-                <p className="text-white text-3xl md:text-4xl font-black heading-serif">
+                <p className="text-white text-4xl font-black heading-serif whitespace-nowrap">
                    ₹{data.totalAmount}
                 </p>
              </div>
@@ -309,10 +317,11 @@ export default function CertificatePage() {
 
           {/* Dynamic Legal Registry ID watermark */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 opacity-30 w-full text-center">
-            <p className="text-black text-[10px] md:text-[9px] font-mono tracking-[0.3em] uppercase">
+            <p className="text-black text-[9px] font-mono tracking-[0.3em] uppercase">
               Authenticated Digital Registry ID • <span className="font-bold">{data.certificateId}</span>
             </p>
           </div>
+        </div>
         </div>
       </div>
     </>
