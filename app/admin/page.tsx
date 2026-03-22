@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { Leaf, Globe, FileText, Building2, LogOut, MapPin, DollarSign, Lock, Inbox, AlertTriangle } from "lucide-react";
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("trees");
@@ -150,20 +151,20 @@ export default function AdminPanel() {
         <h2 className="text-xl font-serif font-bold mb-8 px-2 tracking-wide text-sand">Administrator Panel</h2>
         <nav className="flex flex-col gap-2 flex-1">
           <button onClick={() => setActiveTab("trees")} className={`text-left px-5 py-3.5 rounded-xl transition-all font-medium flex items-center gap-3 ${activeTab === 'trees' ? 'bg-primary text-white shadow-md' : 'text-sand hover:bg-white/10'}`}>
-            <span className="text-xl">🌿</span> Manage Trees
+            <Leaf className="w-5 h-5" /> Manage Trees
           </button>
           <button onClick={() => setActiveTab("projects")} className={`text-left px-5 py-3.5 rounded-xl transition-all font-medium flex items-center gap-3 ${activeTab === 'projects' ? 'bg-primary text-white shadow-md' : 'text-sand hover:bg-white/10'}`}>
-            <span className="text-xl">🌍</span> CSR Projects
+            <Globe className="w-5 h-5" /> CSR Projects
           </button>
           <button onClick={() => setActiveTab("orders")} className={`text-left px-5 py-3.5 rounded-xl transition-all font-medium flex items-center gap-3 ${activeTab === 'orders' ? 'bg-primary text-white shadow-md' : 'text-sand hover:bg-white/10'}`}>
-            <span className="text-xl">📜</span> Validations
+            <FileText className="w-5 h-5" /> Validations
           </button>
           <button onClick={() => setActiveTab("partners")} className={`text-left px-5 py-3.5 rounded-xl transition-all font-medium flex items-center gap-3 ${activeTab === 'partners' ? 'bg-primary text-white shadow-md' : 'text-sand hover:bg-white/10'}`}>
-            <span className="text-xl">🤝</span> CSR Partners
+            <Building2 className="w-5 h-5" /> CSR Partners
           </button>
         </nav>
         <button onClick={handleLogout} className="mb-8 px-5 py-3.5 hover:ring-2 ring-red-500/50 bg-red-500/20 text-red-100 font-bold rounded-xl transition-all flex items-center gap-2">
-          <span>⏏</span> Secure Logout
+          <LogOut className="w-4 h-4" /> Secure Logout
         </button>
       </aside>
 
@@ -173,7 +174,7 @@ export default function AdminPanel() {
         
         {adminError && (
           <div className="bg-red-50 text-red-500 font-bold p-4 mb-8 rounded-xl border border-red-200 shadow-sm">
-            🚨 Error Occurred: {adminError}
+            <AlertTriangle className="w-4 h-4" /> Error Occurred: {adminError}
           </div>
         )}
         
@@ -222,7 +223,7 @@ export default function AdminPanel() {
                       <p className="font-bold text-forest text-lg leading-tight w-2/3">{p.title}</p>
                       <button onClick={() => handleDeleteItem("projects", p._id)} className="text-[10px] uppercase font-bold text-red-500 px-3 py-1 bg-red-50 rounded-full hover:bg-red-500 hover:text-white transition-colors border border-red-100 shadow-sm">Delete</button>
                     </div>
-                    <p className="text-xs font-semibold text-earth flex items-center gap-1 mb-3"><span className="text-primary">📍</span> {p.location}</p>
+                    <p className="text-xs font-semibold text-earth flex items-center gap-1 mb-3"><MapPin className="w-3 h-3 text-primary" /> {p.location}</p>
                     <p className="text-[13px] text-bark leading-relaxed mb-4">{p.description}</p>
                   </div>
                   
@@ -269,8 +270,8 @@ export default function AdminPanel() {
                     <p className="text-[13px] text-bark font-medium mb-3">Trees: <span className="text-forest font-bold">{o.trees.map((t: any) => `${t.quantity}x ${t.name}`).join(', ')}</span></p>
                     
                     <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider">
-                      <span className="text-forest flex items-center gap-1"><span className="text-[15px]">💰</span> ₹{o.totalAmount}</span>
-                      <span className={`flex items-center gap-1 ${o.paymentStatus === 'Completed' ? 'text-green-600' : 'text-amber-500'}`}><span className="text-[15px]">🔒</span> {o.paymentStatus}</span>
+                      <span className="text-forest flex items-center gap-1"><DollarSign className="w-4 h-4" /> ₹{o.totalAmount}</span>
+                      <span className={`flex items-center gap-1 ${o.paymentStatus === 'Completed' ? 'text-green-600' : 'text-amber-500'}`}><Lock className="w-4 h-4" /> {o.paymentStatus}</span>
                     </div>
                   </div>
                   <div className="w-full md:w-auto mt-4 md:mt-0">
@@ -289,7 +290,7 @@ export default function AdminPanel() {
               ))}
               {data.orders.length === 0 && (
                 <div className="text-center py-20 bg-white border border-sand rounded-3xl">
-                  <span className="text-4xl">📭</span>
+                  <Inbox className="w-10 h-10 text-earth/30 mx-auto" />
                   <p className="font-bold text-forest mt-4">No tree orders in the database.</p>
                 </div>
               )}

@@ -14,27 +14,34 @@ const seedTrees = [
   { name: "Amla Tree", price: 28, type: "Medicinal", img: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80" },
 ];
 
-export async function GET() {
-  await dbConnect();
-  
-  // Developer feature: Self-seed trees if database is completely empty so marketplace isn't blank
-  const count = await Tree.countDocuments();
-  if (count === 0) {
-    await Tree.insertMany(seedTrees);
-  }
-
-  const trees = await Tree.find({});
-  
-  // Format trees dynamically to match original static structure
-  const formattedTrees = trees.map(t => ({
-    id: t._id.toString(),
+// Format seed data consistently
+function formatTree(t: any, index: number) {
+  return {
+    id: t._id?.toString() || `seed-${index}`,
     name: t.name,
     price: t.price,
     type: t.type,
     img: t.img,
     rating: 4.5,
-    reviews: Math.floor(Math.random() * 200) + 50
-  }));
+    reviews: Math.floor(Math.random() * 200) + 50,
+  };
+}
 
-  return NextResponse.json(formattedTrees);
+export async function GET() {
+  try {
+    await dbConnect();
+
+    // Auto-seed if database is empty
+    const count = await Tree.countDocuments();
+    if (count === 0) {
+      await Tree.insertMany(seedTrees);
+    }
+
+    const trees = await Tree.find({});
+    return NextResponse.json(trees.map((t, i) => formatTree(t, i)));
+  } catch {
+    // DB unreachable — return hardcoded seed data so marketplace is never empty
+    console.warn("[API /trees] Database unreachable, returning seed data");
+    return NextResponse.json(seedTrees.map((t, i) => formatTree(t, i)));
+  }
 }
